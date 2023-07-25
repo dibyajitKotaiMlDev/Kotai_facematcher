@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import face_recognition
 import os
+from eyeblink_detector import *
 app = Flask(__name__)
 
 # Function to process the image and name
@@ -152,14 +153,25 @@ def process_video_api():
     try:
         # Get the video file from the request
         video_file = request.files['video']
+        print("checking blinking result ",check_blinking(video_file.filename))
+        # # Create a destination path to store the file in the current directory
+        # destination_path = os.path.join(os.getcwd(), video_file)
+        # ## saving the video in working directory
+        # video_file.save(destination_path)
 
-        # Process the video and check the condition
-        result,user_name = matching_face_invideo(video_file.filename)
+        if check_blinking(video_file.filename):
 
-        # Return the result as JSON
-        return jsonify({'result': result,'user_name':user_name})
+
+            # Process the video and check the condition
+            result,user_name = matching_face_invideo(video_file.filename)
+
+            # Return the result as JSON
+            return jsonify({'result': result,'user_name':user_name})
+        else:
+            # Return the result as JSON
+            return jsonify({'result': "No Blinking Detected", 'user_name': "None"})
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return jsonify({'result': "verification failed!!!!",'user_name':"None"})
 
 if __name__ == '__main__':
     app.run(debug=True)
