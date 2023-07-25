@@ -2,6 +2,7 @@
 # import numpy as np
 import cv2
 ## blink checked function
+## it checkes combination of 1 and 0 s (eye detected and no eye detected)
 def blinkchecker(input_list):
     has_one = False
     has_zero = False
@@ -53,7 +54,7 @@ def check_blinking(video_file):
                     if (len(eyes) >= 2):
                         # Check if program is running for detection
                         if (first_read):
-                            print("Eye detected press s to begin")
+                            #print("Eye detected press s to begin")
                             blink_list.append(1)
                             # cv2.putText(img,
                             #             "Eye detected press s to begin",
@@ -61,7 +62,7 @@ def check_blinking(video_file):
                             #             cv2.FONT_HERSHEY_PLAIN, 3,
                             #             (0, 255, 0), 2)
                         else:
-                            print("Eyes open!")
+                            #print("Eyes open!")
                             blink_list.append(1)
                             # cv2.putText(img,
                             #             "Eyes open!", (70, 70),
@@ -69,7 +70,7 @@ def check_blinking(video_file):
                             #             (255, 255, 255), 2)
                     else:
                         if (first_read):
-                            print("No eyes detected")
+                            #print("No eyes detected")
                             blink_list.append(0)
                             # To ensure if the eyes are present before starting
                             # cv2.putText(img,
@@ -78,13 +79,14 @@ def check_blinking(video_file):
                             #             (0, 0, 255), 2)
                         else:
                             # This will print on console and restart the algorithm
-                            print("Blink detected--------------")
+                            #print("Blink detected--------------")
                             blink_list.append(0)
                             # cv2.waitKey(3000)
                             first_read = True
 
             else:
-                print("no face detected")
+                pass
+                #print("no face detected")
                 # cv2.putText(img,
                 #             "No face detected", (100, 100),
                 #             cv2.FONT_HERSHEY_PLAIN, 3,
@@ -102,6 +104,7 @@ def check_blinking(video_file):
         # cap.release()
         # cv2.destroyAllWindows()
         except:
+            print("blink check result - > ",blinkchecker(blink_list))
             if blinkchecker(blink_list):
                 return True
             # break

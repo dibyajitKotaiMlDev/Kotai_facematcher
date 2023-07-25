@@ -3,11 +3,24 @@ import cv2
 import numpy as np
 import face_recognition
 import os
-from eyeblink_detector import *
-app = Flask(__name__)
 
+from werkzeug.utils import secure_filename
+
+from eyeblink_detector import *
+Upload = 'UPLOAD_FOLDER'
+app = Flask(__name__)
+app.config['uploadFolder'] = Upload
+
+
+def delete_all_images(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+            print(f"File '{file_path}' has been deleted.")
 # Function to process the image and name
 def findEncodings(images):
+    # print("in find encodings",images)
     count = 0
     encodeList = []
     # print("len of images ",len(images))
@@ -15,9 +28,12 @@ def findEncodings(images):
     for img in images:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         encode = face_recognition.face_encodings(img)[0]
+        # print(encode)
         encodeList.append(encode)
         count += 1
         # print("count - ",count)
+    # print(encodeList)
+    # os.remove(os.path.join('ImagesAttendance',images[0]))
     return encodeList
 
 
@@ -44,6 +60,7 @@ def convert_filestorage_to_numpy(file_storage):
         print(f"Error converting FileStorage to NumPy array: {e}")
         return None
 def matching_face_invideo(video_file):
+    print("in matching face ",video_file)
     ## var initiation
     path = 'ImagesAttendance'
     images = []
@@ -57,11 +74,13 @@ def matching_face_invideo(video_file):
     # classNames['biplab', 'dibyajit']
     print(classNames)
 
-    print("get the video file",video_file)
-    print("check the type of video - ",type(video_file))
+    # print("get the video file",video_file)
+    # print("check the type of video - ",type(video_file))
     ## added function to work with cv2
     encodeListKnown = findEncodings(images)
     print('Encoding Complete')
+    delete_all_images(path)
+
 
     cap = cv2.VideoCapture(video_file)
 
@@ -93,6 +112,7 @@ def matching_face_invideo(video_file):
                         print("verification completed!!!!")
                         return "verification completed!!!!",name
                 else:
+                    print("matching working")
                     return "verification failed!!!!","None"
                         # cap.release()
                         # cv2.destroyAllWindows()
@@ -101,7 +121,8 @@ def matching_face_invideo(video_file):
 
             # cv2.imshow('Webcam', img)
             # cv2.waitKey(1)
-        except:
+        except Exception as e:
+            print("error in encoding ",e)
             break
 
     # return "username"
@@ -153,17 +174,29 @@ def process_video_api():
     try:
         # Get the video file from the request
         video_file = request.files['video']
-        print("checking blinking result ",check_blinking(video_file.filename))
+        print("check the video file ",video_file.filename)
+        # print("checking blinking result ",check_blinking(video_file.filename))
         # # Create a destination path to store the file in the current directory
         # destination_path = os.path.join(os.getcwd(), video_file)
         # ## saving the video in working directory
         # video_file.save(destination_path)
+        # if video_file.filename != "":
+        filename = secure_filename(video_file.filename)
+        video_path = os.path.join(app.config['uploadFolder'],filename)
+        video_file.save(video_path)
+        print("file saving done")
+        print(video_path)
+        # print(check_blinking(video_path))
 
-        if check_blinking(video_file.filename):
+        if check_blinking(video_path) == None:
+            print("start for face checking")
 
 
             # Process the video and check the condition
-            result,user_name = matching_face_invideo(video_file.filename)
+            result,user_name = matching_face_invideo(video_path)
+
+            ## delete the video before return the result
+            delete_all_images('UPLOAD_FOLDER')
 
             # Return the result as JSON
             return jsonify({'result': result,'user_name':user_name})
