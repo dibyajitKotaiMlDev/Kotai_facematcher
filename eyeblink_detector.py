@@ -107,4 +107,5 @@ def check_blinking(video_file):
             print("blink check result - > ",blinkchecker(blink_list))
             if blinkchecker(blink_list):
                 return True
-            # break
+
+

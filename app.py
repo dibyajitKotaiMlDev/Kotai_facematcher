@@ -130,13 +130,14 @@ def process_image_and_name(image_file, name):
     # Implement your conditions here to process the image and name
     # For simplicity, we'll assume the condition is True if the name is "John"
     # and the image processing is successful.
-    # print(type(image_file))
+    print(image_file)
+    print(type(image_file))
     # Load the cascade
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
     # Read the input image
-    # img = cv2.imread(read_filestorage_image(image_file))
-    img = read_filestorage_image(image_file)
+    img = cv2.imread(image_file)
+    # img = read_filestorage_image(image_file)
 
     # Convert into grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -156,13 +157,25 @@ def process_image_and_name(image_file, name):
 # API endpoint to process the image and name
 @app.route('/image_process', methods=['POST'])
 def image_process():
+    # name = request.form['name']
+    # print("name - here ",name)
+    # image_file = request.files['image']
+    #
+    # # Process the image and name
+    # result = process_image_and_name(image_file, name)
+    #
+    # # Return the result as JSON
+    # return jsonify({'result': result})
     try:
         # Get the name and image file from the request
         name = request.form['name']
+        print("name ",name)
         image_file = request.files['image']
+        print("image file ",image_file.filename)
+        image_file.save(image_file.filename)
 
         # Process the image and name
-        result = process_image_and_name(image_file, name)
+        result = process_image_and_name(image_file.filename, name)
 
         # Return the result as JSON
         return jsonify({'result': result})
@@ -188,7 +201,7 @@ def process_video_api():
         print(video_path)
         # print(check_blinking(video_path))
 
-        if check_blinking(video_path) == None:
+        if check_blinking(video_path):
             print("start for face checking")
 
 
@@ -207,4 +220,4 @@ def process_video_api():
         return jsonify({'result': "verification failed!!!!",'user_name':"None"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
